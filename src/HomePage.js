@@ -164,8 +164,10 @@ function HomePage() {
         paddingLeft: "max(16px, env(safe-area-inset-left))",
         paddingRight: "max(16px, env(safe-area-inset-right))",
         borderBottom: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
-        position: "sticky",
+        position: "fixed",
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 100
       }}>
         <div style={{
@@ -248,6 +250,7 @@ function HomePage() {
       <main style={{
         flex: 1,
         padding: "16px",
+        paddingTop: "calc(80px + max(16px, env(safe-area-inset-top)))",
         paddingBottom: "max(16px, env(safe-area-inset-bottom))",
         paddingLeft: "max(16px, env(safe-area-inset-left))",
         paddingRight: "max(16px, env(safe-area-inset-right))",
