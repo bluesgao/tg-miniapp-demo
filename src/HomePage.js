@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 
 function HomePage() {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("light");
   const [cryptoData, setCryptoData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -36,17 +38,13 @@ function HomePage() {
       setLoading(true);
       setError(null);
 
-      // 尝试多个API端点
       const apiEndpoints = [
         'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false',
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,solana,polkadot&vs_currencies=usd&include_24hr_change=true&include_market_cap=true',
-        'https://api.coinpaprika.com/v1/coins'
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,solana,polkadot&vs_currencies=usd&include_24hr_change=true&include_market_cap=true'
       ];
 
       let data = null;
-      let apiUsed = '';
 
-      // 尝试第一个API（完整数据）
       try {
         const response = await fetch(apiEndpoints[0], {
           method: 'GET',
@@ -58,13 +56,11 @@ function HomePage() {
 
         if (response.ok) {
           data = await response.json();
-          apiUsed = 'coingecko_full';
         }
       } catch (err) {
-        console.log('CoinGecko full API failed, trying simple API...');
+        // API调用失败，继续尝试下一个
       }
 
-      // 如果第一个失败，尝试第二个API（简化数据）
       if (!data) {
         try {
           const response = await fetch(apiEndpoints[1], {
@@ -77,7 +73,6 @@ function HomePage() {
 
           if (response.ok) {
             const simpleData = await response.json();
-            // 转换简化数据格式
             data = Object.keys(simpleData).map(id => ({
               id: id,
               symbol: id,
@@ -88,84 +83,19 @@ function HomePage() {
               total_volume: simpleData[id].usd_24h_vol || 0,
               price_change_percentage_24h: simpleData[id].usd_24h_change || 0
             }));
-            apiUsed = 'coingecko_simple';
           }
         } catch (err) {
-          console.log('CoinGecko simple API failed, trying Coinpaprika...');
+          // 备用API调用失败
         }
       }
 
-      // 如果前两个都失败，使用模拟数据
-      if (!data) {
-        console.log('All APIs failed, using mock data...');
-        data = [
-          {
-            id: 'bitcoin',
-            symbol: 'btc',
-            name: 'Bitcoin',
-            image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
-            current_price: 43250.25,
-            market_cap: 847123456789,
-            total_volume: 23456789012,
-            price_change_percentage_24h: 2.45
-          },
-          {
-            id: 'ethereum',
-            symbol: 'eth',
-            name: 'Ethereum',
-            image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-            current_price: 2650.75,
-            market_cap: 318765432109,
-            total_volume: 15678901234,
-            price_change_percentage_24h: -1.23
-          },
-          {
-            id: 'binancecoin',
-            symbol: 'bnb',
-            name: 'BNB',
-            image: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
-            current_price: 312.50,
-            market_cap: 48123456789,
-            total_volume: 2345678901,
-            price_change_percentage_24h: 0.87
-          },
-          {
-            id: 'cardano',
-            symbol: 'ada',
-            name: 'Cardano',
-            image: 'https://assets.coingecko.com/coins/images/975/large/Cardano.png',
-            current_price: 0.485,
-            market_cap: 17234567890,
-            total_volume: 1234567890,
-            price_change_percentage_24h: 3.21
-          },
-          {
-            id: 'solana',
-            symbol: 'sol',
-            name: 'Solana',
-            image: 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
-            current_price: 98.75,
-            market_cap: 42345678901,
-            total_volume: 3456789012,
-            price_change_percentage_24h: -0.56
-          },
-          {
-            id: 'polkadot',
-            symbol: 'dot',
-            name: 'Polkadot',
-            image: 'https://assets.coingecko.com/coins/images/12171/large/polkadot_new_logo.png',
-            current_price: 7.25,
-            market_cap: 9876543210,
-            total_volume: 567890123,
-            price_change_percentage_24h: 1.89
-          }
-        ];
-        apiUsed = 'mock_data';
+      if (data) {
+        setCryptoData(data);
+      } else {
+        setError('无法获取加密货币数据，请检查网络连接后重试');
+        console.error('All APIs failed');
       }
 
-      setCryptoData(data);
-      console.log(`Data loaded successfully using: ${apiUsed}`);
-      
     } catch (err) {
       setError('获取加密货币数据时出错，请稍后重试');
       console.error('Error fetching crypto data:', err);
@@ -174,7 +104,6 @@ function HomePage() {
     }
   };
 
-  // 组件加载时获取数据
   useEffect(() => {
     fetchCryptoData();
 
@@ -184,13 +113,6 @@ function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // 过滤加密货币数据
-  const filteredCryptoData = cryptoData.filter(crypto =>
-    crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // 格式化价格显示
   const formatPrice = (price) => {
     if (price < 1) {
       return `$${price.toFixed(6)}`;
@@ -201,7 +123,6 @@ function HomePage() {
     }
   };
 
-  // 格式化市值显示
   const formatMarketCap = (marketCap) => {
     if (marketCap >= 1e12) {
       return `$${(marketCap / 1e12).toFixed(2)}T`;
@@ -214,12 +135,10 @@ function HomePage() {
     }
   };
 
-  // 获取价格变化颜色
   const getPriceChangeColor = (change) => {
     return change >= 0 ? '#4CAF50' : '#F44336';
   };
 
-  // 处理点击事件
   const handleCryptoClick = (cryptoId) => {
     navigate(`/crypto/${cryptoId}`);
   };
@@ -230,250 +149,220 @@ function HomePage() {
         backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
         color: theme === "dark" ? "#fff" : "#000",
         minHeight: "100vh",
-        minHeight: "100dvh", // 使用动态视口高度
-        padding: "16px",
-        paddingTop: "max(16px, env(safe-area-inset-top))", // 适配刘海屏顶部
-        paddingBottom: "max(16px, env(safe-area-inset-bottom))", // 适配底部安全区域
-        paddingLeft: "max(16px, env(safe-area-inset-left))", // 适配左侧安全区域
-        paddingRight: "max(16px, env(safe-area-inset-right))", // 适配右侧安全区域
+        minHeight: "100dvh",
         boxSizing: "border-box",
-        overflowX: "hidden" // 防止水平滚动
+        overflowX: "hidden",
+        display: "flex",
+        flexDirection: "column"
       }}
     >
-      {/* 头部信息 */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <h2 style={{
-          margin: "0 0 10px 0",
-          color: theme === "dark" ? "#fff" : "#333"
-        }}>
-          💰 虚拟货币实时价格
-        </h2>
-        {user && (
-          <p style={{
-            margin: "0 0 10px 0",
-            fontSize: "14px",
-            color: theme === "dark" ? "#ccc" : "#666"
-          }}>
-            欢迎, <b>{user.first_name}</b>!
-          </p>
-        )}
-      </div>
-
-      {/* 搜索框 */}
-      <div style={{ marginBottom: "16px", width: "100%" }}>
-        <input
-          type="text"
-          placeholder="搜索加密货币..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "12px",
-            borderRadius: "8px",
-            border: "1px solid #ddd",
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
-            color: theme === "dark" ? "#fff" : "#000",
-            fontSize: "16px",
-            boxSizing: "border-box",
-            maxWidth: "100%",
-            minHeight: "44px" // 确保触摸友好
-          }}
-        />
-      </div>
-
-      {/* 主流虚拟货币快速预览 */}
-      <div style={{ marginBottom: "20px" }}>
-        <h3 style={{
-          margin: "0 0 12px 0",
-          fontSize: "16px",
-          color: theme === "dark" ? "#fff" : "#333",
-          fontWeight: "600"
-        }}>
-          🏆 主流虚拟货币
-        </h3>
+      {/* Header */}
+      <header style={{
+        backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
+        padding: "16px",
+        paddingTop: "max(16px, env(safe-area-inset-top))",
+        paddingLeft: "max(16px, env(safe-area-inset-left))",
+        paddingRight: "max(16px, env(safe-area-inset-right))",
+        borderBottom: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
+        position: "sticky",
+        top: 0,
+        zIndex: 100
+      }}>
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: "8px",
-          width: "100%",
-          maxWidth: "100vw"
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between"
         }}>
-          {cryptoData.slice(0, 6).map((crypto) => (
-            <div
-              key={crypto.id}
-              onClick={() => handleCryptoClick(crypto.id)}
-              style={{
-                backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
-                borderRadius: "8px",
-                padding: "12px",
-                border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
-                boxShadow: theme === "dark" ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.1)",
-                cursor: "pointer",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                touchAction: "manipulation"
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-2px)";
-                e.target.style.boxShadow = theme === "dark" 
-                  ? "0 4px 12px rgba(0,0,0,0.4)" 
-                  : "0 4px 12px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0)";
-                e.target.style.boxShadow = theme === "dark" 
-                  ? "0 1px 4px rgba(0,0,0,0.2)" 
-                  : "0 1px 4px rgba(0,0,0,0.1)";
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
-                <img
-                  src={crypto.image}
-                  alt={crypto.name}
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    marginRight: "8px",
-                    borderRadius: "50%"
-                  }}
-                />
-                <div style={{
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                  color: theme === "dark" ? "#fff" : "#333"
-                }}>
-                  {crypto.symbol.toUpperCase()}
-                </div>
-              </div>
-              <div style={{
-                fontSize: "14px",
-                fontWeight: "bold",
-                marginBottom: "4px",
-                color: theme === "dark" ? "#fff" : "#333"
+          <div style={{ flex: 1 }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between"
+            }}>
+              <h2 style={{
+                margin: "0",
+                color: theme === "dark" ? "#fff" : "#333",
+                fontSize: "20px",
+                fontWeight: "600"
               }}>
-                {formatPrice(crypto.current_price)}
-              </div>
-              <div style={{
-                fontSize: "11px",
-                color: getPriceChangeColor(crypto.price_change_percentage_24h),
-                fontWeight: "bold"
-              }}>
-                {crypto.price_change_percentage_24h >= 0 ? "+" : ""}
-                {crypto.price_change_percentage_24h.toFixed(2)}%
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 刷新按钮 */}
-      <div style={{ marginBottom: "16px", textAlign: "center" }}>
-        <button
-          onClick={fetchCryptoData}
-          disabled={loading}
-          style={{
-            padding: "12px 24px",
-            borderRadius: "8px",
-            border: "none",
-            backgroundColor: theme === "dark" ? "#4CAF50" : "#007BFF",
-            color: "#fff",
-            fontSize: "16px",
-            cursor: loading ? "not-allowed" : "pointer",
-            opacity: loading ? 0.6 : 1,
-            minHeight: "44px", // 触摸友好
-            minWidth: "120px",
-            touchAction: "manipulation" // 优化触摸体验
-          }}
-        >
-          {loading ? "加载中..." : "🔄 刷新数据"}
-        </button>
-      </div>
-
-      {/* 错误信息 */}
-      {error && (
-        <div style={{
-          padding: "12px",
-          backgroundColor: "#ffebee",
-          color: "#c62828",
-          borderRadius: "8px",
-          marginBottom: "16px",
-          textAlign: "center"
-        }}>
-          {error}
-        </div>
-      )}
-
-      {/* 数据源信息 */}
-      {!loading && cryptoData.length > 0 && (
-        <div style={{
-          padding: "8px 12px",
-          backgroundColor: theme === "dark" ? "#2d2d2d" : "#e8f5e8",
-          color: theme === "dark" ? "#4CAF50" : "#2e7d32",
-          borderRadius: "6px",
-          marginBottom: "16px",
-          textAlign: "center",
-          fontSize: "12px"
-        }}>
-          📡 数据已加载 - 实时更新中
-        </div>
-      )}
-
-      {/* 加密货币列表 */}
-      <div style={{ marginBottom: "20px" }}>
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "40px" }}>
-            <div style={{ fontSize: "18px", marginBottom: "10px" }}>⏳</div>
-            <div>正在加载加密货币数据...</div>
-          </div>
-        ) : filteredCryptoData.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "40px" }}>
-            <div style={{ fontSize: "18px", marginBottom: "10px" }}>🔍</div>
-            <div>未找到匹配的加密货币</div>
-          </div>
-        ) : (
-          <div>
-            {filteredCryptoData.map((crypto, index) => (
-              <div
-                key={crypto.id}
-                onClick={() => handleCryptoClick(crypto.id)}
+                虚拟货币实时数据
+              </h2>
+              <button
+                onClick={fetchCryptoData}
+                disabled={loading}
                 style={{
-                  backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  marginBottom: "12px",
-                  boxShadow: theme === "dark" ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.1)",
-                  border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
-                  cursor: "pointer",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                  touchAction: "manipulation"
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "8px",
+                  borderRadius: "50%",
+                  border: "none",
+                  backgroundColor: theme === "dark" ? "#3d3d3d" : "#f8f9fa",
+                  color: theme === "dark" ? "#fff" : "#333",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.6 : 1,
+                  width: "36px",
+                  height: "36px",
+                  touchAction: "manipulation",
+                  boxShadow: theme === "dark" ? "0 1px 3px rgba(0,0,0,0.3)" : "0 1px 3px rgba(0,0,0,0.1)",
+                  transition: "all 0.2s ease",
+                  border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow = theme === "dark" 
-                    ? "0 6px 16px rgba(0,0,0,0.4)" 
-                    : "0 6px 16px rgba(0,0,0,0.15)";
+                  if (!loading) {
+                    e.target.style.backgroundColor = theme === "dark" ? "#4d4d4d" : "#e9ecef";
+                    e.target.style.transform = "scale(1.1)";
+                    e.target.style.boxShadow = theme === "dark"
+                      ? "0 2px 6px rgba(0,0,0,0.4)"
+                      : "0 2px 6px rgba(0,0,0,0.15)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow = theme === "dark" 
-                    ? "0 2px 8px rgba(0,0,0,0.3)" 
-                    : "0 2px 8px rgba(0,0,0,0.1)";
+                  e.target.style.backgroundColor = theme === "dark" ? "#3d3d3d" : "#f8f9fa";
+                  e.target.style.transform = "scale(1)";
+                  e.target.style.boxShadow = theme === "dark"
+                    ? "0 1px 3px rgba(0,0,0,0.3)"
+                    : "0 1px 3px rgba(0,0,0,0.1)";
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                  {/* 左侧：图标和名称 */}
-                  <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-                    <img
-                      src={crypto.image}
-                      alt={crypto.name}
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        marginRight: "12px",
-                        borderRadius: "50%",
-                        flexShrink: 0
-                      }}
-                    />
-                    <div style={{ minWidth: 0, flex: 1 }}>
+                <FontAwesomeIcon
+                  icon={faArrowsRotate}
+                  style={{
+                    color: theme === "dark" ? "#fff" : "#333",
+                    transform: loading ? "rotate(360deg)" : "rotate(0deg)",
+                    transition: "transform 0.8s linear",
+                    fontSize: "18px"
+                  }}
+                />
+              </button>
+            </div>
+            {user && (
+              <p style={{
+                margin: "10px 0 0 0",
+                fontSize: "14px",
+                color: theme === "dark" ? "#ccc" : "#666"
+              }}>
+                欢迎, <b>{user.first_name}</b>!
+              </p>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Body List */}
+      <main style={{
+        flex: 1,
+        padding: "16px",
+        paddingBottom: "max(16px, env(safe-area-inset-bottom))",
+        paddingLeft: "max(16px, env(safe-area-inset-left))",
+        paddingRight: "max(16px, env(safe-area-inset-right))",
+        overflowY: "auto"
+      }}>
+
+
+
+
+
+
+
+
+        {error && (
+          <div style={{
+            padding: "12px",
+            backgroundColor: "#ffebee",
+            color: "#c62828",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            textAlign: "center"
+          }}>
+            {error}
+          </div>
+        )}
+
+
+
+        {/* 加密货币列表 */}
+        <div style={{ marginBottom: "20px" }}>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <div style={{ fontSize: "18px", marginBottom: "10px" }}>⏳</div>
+              <div>正在加载加密货币数据...</div>
+            </div>
+          ) : cryptoData.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <div style={{ fontSize: "18px", marginBottom: "10px" }}>📊</div>
+              <div>暂无虚拟货币数据</div>
+            </div>
+          ) : (
+            <div>
+              {cryptoData.map((crypto, index) => (
+                <div
+                  key={crypto.id}
+                  onClick={() => handleCryptoClick(crypto.id)}
+                  style={{
+                    backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    marginBottom: "12px",
+                    boxShadow: theme === "dark" ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.1)",
+                    border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
+                    cursor: "pointer",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                    touchAction: "manipulation"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow = theme === "dark"
+                      ? "0 6px 16px rgba(0,0,0,0.4)"
+                      : "0 6px 16px rgba(0,0,0,0.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = theme === "dark"
+                      ? "0 2px 8px rgba(0,0,0,0.3)"
+                      : "0 2px 8px rgba(0,0,0,0.1)";
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    {/* 左侧：图标和名称 */}
+                    <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+                      <img
+                        src={crypto.image}
+                        alt={crypto.name}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          marginRight: "12px",
+                          borderRadius: "50%",
+                          flexShrink: 0
+                        }}
+                      />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{
+                          fontWeight: "bold",
+                          fontSize: "16px",
+                          marginBottom: "4px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap"
+                        }}>
+                          {crypto.name}
+                        </div>
+                        <div style={{
+                          fontSize: "12px",
+                          color: theme === "dark" ? "#ccc" : "#666",
+                          textTransform: "uppercase",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap"
+                        }}>
+                          {crypto.symbol}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 右侧：价格和变化 */}
+                    <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "8px" }}>
                       <div style={{
                         fontWeight: "bold",
                         fontSize: "16px",
@@ -482,96 +371,72 @@ function HomePage() {
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap"
                       }}>
-                        {crypto.name}
+                        {formatPrice(crypto.current_price)}
                       </div>
                       <div style={{
                         fontSize: "12px",
-                        color: theme === "dark" ? "#ccc" : "#666",
-                        textTransform: "uppercase",
+                        color: getPriceChangeColor(crypto.price_change_percentage_24h),
+                        fontWeight: "bold",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap"
                       }}>
-                        {crypto.symbol}
+                        {crypto.price_change_percentage_24h >= 0 ? "+" : ""}
+                        {crypto.price_change_percentage_24h.toFixed(2)}%
                       </div>
                     </div>
                   </div>
 
-                  {/* 右侧：价格和变化 */}
-                  <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "8px" }}>
-                    <div style={{
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                      marginBottom: "4px",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap"
-                    }}>
-                      {formatPrice(crypto.current_price)}
-                    </div>
-                    <div style={{
-                      fontSize: "12px",
-                      color: getPriceChangeColor(crypto.price_change_percentage_24h),
-                      fontWeight: "bold",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap"
-                    }}>
-                      {crypto.price_change_percentage_24h >= 0 ? "+" : ""}
-                      {crypto.price_change_percentage_24h.toFixed(2)}%
-                    </div>
+                  {/* 市值信息 */}
+                  <div style={{
+                    marginTop: "12px",
+                    paddingTop: "12px",
+                    borderTop: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
+                    fontSize: "12px",
+                    color: theme === "dark" ? "#ccc" : "#666",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                  }}>
+                    市值: {formatMarketCap(crypto.market_cap)} | 24h交易量: {formatMarketCap(crypto.total_volume)}
                   </div>
                 </div>
-
-                {/* 市值信息 */}
-                <div style={{
-                  marginTop: "12px",
-                  paddingTop: "12px",
-                  borderTop: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
-                  fontSize: "12px",
-                  color: theme === "dark" ? "#ccc" : "#666",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap"
-                }}>
-                  市值: {formatMarketCap(crypto.market_cap)} | 24h交易量: {formatMarketCap(crypto.total_volume)}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* 底部信息 */}
-      <div style={{
-        textAlign: "center",
-        padding: "16px",
-        borderTop: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
-        fontSize: "12px",
-        color: theme === "dark" ? "#ccc" : "#666"
-      }}>
-        <div>数据来源: CoinGecko API</div>
-        <div>数据每5分钟自动更新</div>
-        <div style={{ marginTop: "10px" }}>
-          <button
-            style={{
-              padding: "12px 20px",
-              borderRadius: "6px",
-              border: "none",
-              backgroundColor: theme === "dark" ? "#666" : "#ddd",
-              color: theme === "dark" ? "#fff" : "#333",
-              fontSize: "14px",
-              cursor: "pointer",
-              minHeight: "44px", // 触摸友好
-              minWidth: "100px",
-              touchAction: "manipulation" // 优化触摸体验
-            }}
-            onClick={() => window.Telegram.WebApp.close()}
-          >
-            关闭小程序
-          </button>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+
+        {/* 底部信息 */}
+        <div style={{
+          textAlign: "center",
+          padding: "16px",
+          borderTop: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
+          fontSize: "12px",
+          color: theme === "dark" ? "#ccc" : "#666"
+        }}>
+          <div>数据来源: CoinGecko API</div>
+          <div>数据每5分钟自动更新</div>
+          <div style={{ marginTop: "10px" }}>
+            <button
+              style={{
+                padding: "12px 20px",
+                borderRadius: "6px",
+                border: "none",
+                backgroundColor: theme === "dark" ? "#666" : "#ddd",
+                color: theme === "dark" ? "#fff" : "#333",
+                fontSize: "14px",
+                cursor: "pointer",
+                minHeight: "44px", // 触摸友好
+                minWidth: "100px",
+                touchAction: "manipulation" // 优化触摸体验
+              }}
+              onClick={() => window.Telegram.WebApp.close()}
+            >
+              关闭小程序
+            </button>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
