@@ -21,21 +21,13 @@ function CryptoDetail() {
   const [crypto, setCrypto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [theme, setTheme] = useState("light");
+
 
   useEffect(() => {
     const tg = window.Telegram.WebApp;
 
     // 让小程序自动全屏展开
     tg.expand();
-
-    // 获取主题
-    setTheme(tg.colorScheme);
-
-    // 监听主题变化
-    tg.onEvent("themeChanged", () => {
-      setTheme(tg.colorScheme);
-    });
   }, []);
 
   useEffect(() => {
@@ -115,14 +107,15 @@ function CryptoDetail() {
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: theme === "dark" ? "#007AFF" : "#007AFF",
-            colorBackground: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
-            colorText: theme === "dark" ? "#fff" : "#000",
+            colorPrimary: "#007AFF",
+            colorBackground: "#f5f5f5",
+            colorText: "#000",
           },
         }}
+        appearance="light"
       >
         <div style={{
-          backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
+          backgroundColor: "#f5f5f5",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -141,14 +134,15 @@ function CryptoDetail() {
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: theme === "dark" ? "#007AFF" : "#007AFF",
-            colorBackground: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
-            colorText: theme === "dark" ? "#fff" : "#000",
+            colorPrimary: "#007AFF",
+            colorBackground: "#f5f5f5",
+            colorText: "#000",
           },
         }}
+        appearance="light"
       >
         <div style={{
-          backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
+          backgroundColor: "#f5f5f5",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -175,14 +169,15 @@ function CryptoDetail() {
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: theme === "dark" ? "#007AFF" : "#007AFF",
-          colorBackground: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
-          colorText: theme === "dark" ? "#fff" : "#000",
+          colorPrimary: "#007AFF",
+          colorBackground: "#f5f5f5",
+          colorText: "#000",
         },
       }}
+      appearance="light"
     >
       <div style={{
-        backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
+        backgroundColor: "#f5f5f5",
         minHeight: "100vh"
       }}>
         {/* Header */}
@@ -193,8 +188,8 @@ function CryptoDetail() {
             left: 0,
             right: 0,
             zIndex: 100,
-            backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
-            borderBottom: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
+            backgroundColor: "#fff",
+            borderBottom: "1px solid #e0e0e0"
           }}
           onBack={handleBack}
         >
@@ -202,7 +197,7 @@ function CryptoDetail() {
             <div style={{ fontSize: "18px", fontWeight: "600" }}>
               {crypto.name}
             </div>
-            <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginTop: "2px" }}>
+            <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
               {crypto.symbol.toUpperCase()}
             </div>
           </div>
@@ -211,13 +206,10 @@ function CryptoDetail() {
         {/* Body */}
         <div style={{
           paddingTop: "calc(60px + env(safe-area-inset-top))",
-          paddingBottom: "env(safe-area-inset-bottom)",
-          paddingLeft: "env(safe-area-inset-left)",
-          paddingRight: "env(safe-area-inset-right)",
           minHeight: "100vh"
         }}>
-          {/* 主要信息卡片 */}
-          <Card style={{ margin: "16px", borderRadius: "12px" }}>
+          {/* 主要信息 */}
+          <div style={{ padding: "16px" }}>
             {/* 币种图标和基本信息 */}
             <div style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
               <img
@@ -240,7 +232,7 @@ function CryptoDetail() {
                 </h2>
                 <div style={{
                   fontSize: "16px",
-                  color: theme === "dark" ? "#ccc" : "#666",
+                  color: "#666",
                   textTransform: "uppercase"
                 }}>
                   {crypto.symbol}
@@ -253,10 +245,10 @@ function CryptoDetail() {
               textAlign: "center",
               marginBottom: "20px",
               padding: "16px",
-              backgroundColor: theme === "dark" ? "#333" : "#f8f9fa",
+              backgroundColor: "#f8f9fa",
               borderRadius: "8px"
             }}>
-              <div style={{ fontSize: "14px", marginBottom: "8px", color: theme === "dark" ? "#ccc" : "#666" }}>
+              <div style={{ fontSize: "14px", marginBottom: "8px", color: "#666" }}>
                 当前价格
               </div>
               <div style={{
@@ -276,48 +268,52 @@ function CryptoDetail() {
             </div>
 
             {/* 价格变化统计 */}
-            <Grid columns={3} gap={8} style={{ marginBottom: "20px" }}>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
-                  1小时
+            <div style={{ marginBottom: "20px" }}>
+              <Grid columns={3} gap={8}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
+                    1小时
+                  </div>
+                  <div style={{
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: getPriceChangeColor(crypto.market_data?.price_change_percentage_1h_in_currency?.usd)
+                  }}>
+                    {formatPercentage(crypto.market_data?.price_change_percentage_1h_in_currency?.usd)}
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  color: getPriceChangeColor(crypto.market_data?.price_change_percentage_1h_in_currency?.usd)
-                }}>
-                  {formatPercentage(crypto.market_data?.price_change_percentage_1h_in_currency?.usd)}
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
+                    24小时
+                  </div>
+                  <div style={{
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: getPriceChangeColor(crypto.market_data?.price_change_percentage_24h)
+                  }}>
+                    {formatPercentage(crypto.market_data?.price_change_percentage_24h)}
+                  </div>
                 </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
-                  24小时
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
+                    7天
+                  </div>
+                  <div style={{
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: getPriceChangeColor(crypto.market_data?.price_change_percentage_7d)
+                  }}>
+                    {formatPercentage(crypto.market_data?.price_change_percentage_7d)}
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  color: getPriceChangeColor(crypto.market_data?.price_change_percentage_24h)
-                }}>
-                  {formatPercentage(crypto.market_data?.price_change_percentage_24h)}
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
-                  7天
-                </div>
-                <div style={{
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  color: getPriceChangeColor(crypto.market_data?.price_change_percentage_7d)
-                }}>
-                  {formatPercentage(crypto.market_data?.price_change_percentage_7d)}
-                </div>
-              </div>
-            </Grid>
-          </Card>
+              </Grid>
+            </div>
+          </div>
+
+          <Divider style={{ margin: "0" }} />
 
           {/* 市场数据 */}
-          <Card style={{ margin: "16px", borderRadius: "12px" }}>
+          <div style={{ padding: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
               <HistogramOutline style={{ marginRight: "8px" }} />
               <h3 style={{
@@ -331,7 +327,7 @@ function CryptoDetail() {
 
             <Grid columns={2} gap={16}>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   市值
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -339,7 +335,7 @@ function CryptoDetail() {
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   24h交易量
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -347,7 +343,7 @@ function CryptoDetail() {
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   流通供应量
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -355,7 +351,7 @@ function CryptoDetail() {
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   总供应量
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold" }}>
@@ -363,10 +359,12 @@ function CryptoDetail() {
                 </div>
               </div>
             </Grid>
-          </Card>
+          </div>
+
+          <Divider style={{ margin: "0" }} />
 
           {/* 价格范围 */}
-          <Card style={{ margin: "16px", borderRadius: "12px" }}>
+          <div style={{ padding: "16px" }}>
             <h3 style={{
               margin: "0 0 16px 0",
               fontSize: "18px",
@@ -377,7 +375,7 @@ function CryptoDetail() {
 
             <Grid columns={2} gap={16}>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   24h最高
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold", color: "#4CAF50" }}>
@@ -385,7 +383,7 @@ function CryptoDetail() {
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   24h最低
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold", color: "#F44336" }}>
@@ -393,7 +391,7 @@ function CryptoDetail() {
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   历史最高
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold", color: "#4CAF50" }}>
@@ -401,7 +399,7 @@ function CryptoDetail() {
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>
                   历史最低
                 </div>
                 <div style={{ fontSize: "16px", fontWeight: "bold", color: "#F44336" }}>
@@ -409,11 +407,13 @@ function CryptoDetail() {
                 </div>
               </div>
             </Grid>
-          </Card>
+          </div>
+
+          <Divider style={{ margin: "0" }} />
 
           {/* 描述信息 */}
           {crypto.description?.en && (
-            <Card style={{ margin: "16px", borderRadius: "12px" }}>
+            <div style={{ padding: "16px" }}>
               <h3 style={{
                 margin: "0 0 16px 0",
                 fontSize: "18px",
@@ -424,14 +424,14 @@ function CryptoDetail() {
               <div style={{
                 fontSize: "14px",
                 lineHeight: "1.6",
-                color: theme === "dark" ? "#ccc" : "#333",
+                color: "#333",
                 maxHeight: "200px",
                 overflow: "auto"
               }}>
                 {crypto.description.en.replace(/<[^>]*>/g, '').substring(0, 500)}
                 {crypto.description.en.length > 500 && "..."}
               </div>
-            </Card>
+            </div>
           )}
         </div>
       </div>

@@ -14,7 +14,7 @@ import { LoopOutline } from "antd-mobile-icons";
 
 function HomePage() {
   const [user, setUser] = useState(null);
-  const [theme, setTheme] = useState("light");
+
   const [cryptoData, setCryptoData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,14 +30,6 @@ function HomePage() {
     if (tg.initDataUnsafe?.user) {
       setUser(tg.initDataUnsafe.user);
     }
-
-    // 获取主题
-    setTheme(tg.colorScheme);
-
-    // 监听主题变化
-    tg.onEvent("themeChanged", () => {
-      setTheme(tg.colorScheme);
-    });
   }, []);
 
   // 获取加密货币数据
@@ -155,14 +147,15 @@ function HomePage() {
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: theme === "dark" ? "#007AFF" : "#007AFF",
-          colorBackground: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
-          colorText: theme === "dark" ? "#fff" : "#000",
+          colorPrimary: "#007AFF",
+          colorBackground: "#f5f5f5",
+          colorText: "#000",
         },
       }}
+      appearance="light"
     >
       <div style={{
-        backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
+        backgroundColor: "#f5f5f5",
         minHeight: "100vh",
         minHeight: "100dvh"
       }}>
@@ -174,8 +167,8 @@ function HomePage() {
             left: 0,
             right: 0,
             zIndex: 100,
-            backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
-            borderBottom: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
+            backgroundColor: "#fff",
+            borderBottom: "1px solid #e0e0e0"
           }}
           backArrow={false}
           right={
@@ -200,7 +193,7 @@ function HomePage() {
               虚拟货币实时数据
             </div>
             {user && (
-              <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666", marginTop: "2px" }}>
+              <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
                 欢迎, {user.first_name}!
               </div>
             )}
@@ -209,10 +202,7 @@ function HomePage() {
 
         {/* Body List */}
         <div style={{
-          paddingTop: "calc(60px + env(safe-area-inset-top))",
-          paddingBottom: "env(safe-area-inset-bottom)",
-          paddingLeft: "env(safe-area-inset-left)",
-          paddingRight: "env(safe-area-inset-right)",
+          paddingTop: "calc(45px + env(safe-area-inset-top))",
           minHeight: "100vh"
         }}>
           {error && (
@@ -224,7 +214,7 @@ function HomePage() {
           )}
 
           {/* 加密货币列表 */}
-          <div style={{ padding: "16px" }}>
+          <div>
             {loading ? (
               <div style={{ textAlign: "center", padding: "40px" }}>
                 <SpinLoading style={{ marginBottom: "16px" }} />
@@ -264,7 +254,7 @@ function HomePage() {
                       </div>
                     }
                     description={
-                      <div style={{ fontSize: "12px", color: theme === "dark" ? "#ccc" : "#666" }}>
+                      <div style={{ fontSize: "12px", color: "#666" }}>
                         {crypto.symbol.toUpperCase()}
                       </div>
                     }
@@ -287,9 +277,8 @@ function HomePage() {
                     <div style={{
                       marginTop: "8px",
                       paddingTop: "8px",
-                      borderTop: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
                       fontSize: "12px",
-                      color: theme === "dark" ? "#ccc" : "#666"
+                      color: "#666"
                     }}>
                       市值: {formatMarketCap(crypto.market_cap)} | 24h交易量: {formatMarketCap(crypto.total_volume)}
                     </div>
@@ -302,10 +291,9 @@ function HomePage() {
           {/* 底部信息 */}
           <div style={{
             textAlign: "center",
-            padding: "16px",
-            borderTop: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
+            borderTop: "1px solid #e0e0e0",
             fontSize: "12px",
-            color: theme === "dark" ? "#ccc" : "#666"
+            color: "#666"
           }}>
             <div>数据来源: CoinGecko API</div>
             <div>数据每5分钟自动更新</div>
