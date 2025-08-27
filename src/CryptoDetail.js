@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faExclamationTriangle, faSpinner, faChartBar } from "@fortawesome/free-solid-svg-icons";
 
 function CryptoDetail() {
   const { id } = useParams();
@@ -105,7 +105,6 @@ function CryptoDetail() {
           backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
           color: theme === "dark" ? "#fff" : "#000",
           minHeight: "100vh",
-          minHeight: "100dvh",
           padding: "16px",
           paddingTop: "max(16px, env(safe-area-inset-top))",
           paddingBottom: "max(16px, env(safe-area-inset-bottom))",
@@ -117,7 +116,7 @@ function CryptoDetail() {
           flexDirection: "column"
         }}
       >
-        <div style={{ fontSize: "24px", marginBottom: "16px" }}>⏳</div>
+        <FontAwesomeIcon icon={faSpinner} size="2x" style={{ marginBottom: "16px", animation: "spin 1s linear infinite" }} />
         <div>正在加载详细信息...</div>
       </div>
     );
@@ -130,7 +129,6 @@ function CryptoDetail() {
           backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
           color: theme === "dark" ? "#fff" : "#000",
           minHeight: "100vh",
-          minHeight: "100dvh",
           padding: "16px",
           paddingTop: "max(16px, env(safe-area-inset-top))",
           paddingBottom: "max(16px, env(safe-area-inset-bottom))",
@@ -142,7 +140,7 @@ function CryptoDetail() {
           flexDirection: "column"
         }}
       >
-        <div style={{ fontSize: "24px", marginBottom: "16px" }}>❌</div>
+        <FontAwesomeIcon icon={faExclamationTriangle} size="2x" style={{ marginBottom: "16px", color: "#F44336" }} />
         <div style={{ marginBottom: "20px", textAlign: "center" }}>
           {error || "未找到该虚拟货币信息"}
         </div>
@@ -164,15 +162,15 @@ function CryptoDetail() {
             minWidth: "160px",
             touchAction: "manipulation",
             transition: "all 0.2s ease",
-            boxShadow: "0 2px 8px rgba(0, 122, 255, 0.3)"
+
           }}
           onMouseEnter={(e) => {
             e.target.style.transform = "scale(1.02)";
-            e.target.style.boxShadow = "0 4px 12px rgba(0, 122, 255, 0.4)";
+
           }}
           onMouseLeave={(e) => {
             e.target.style.transform = "scale(1)";
-            e.target.style.boxShadow = "0 2px 8px rgba(0, 122, 255, 0.3)";
+
           }}
           onMouseDown={(e) => {
             e.target.style.transform = "scale(0.98)";
@@ -194,37 +192,13 @@ function CryptoDetail() {
         backgroundColor: theme === "dark" ? "#1a1a1a" : "#f5f5f5",
         color: theme === "dark" ? "#fff" : "#000",
         minHeight: "100vh",
-        minHeight: "100dvh",
         boxSizing: "border-box",
         overflowX: "hidden",
         display: "flex",
         flexDirection: "column"
       }}
     >
-      {/* iOS风格快速返回提示 */}
-      <div style={{
-        position: "fixed",
-        top: "20px",
-        right: "20px",
-        backgroundColor: theme === "dark" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.95)",
-        color: theme === "dark" ? "#fff" : "#007AFF",
-        padding: "10px 16px",
-        borderRadius: "20px",
-        fontSize: "13px",
-        zIndex: 1000,
-        backdropFilter: "blur(20px)",
-        border: `1px solid ${theme === "dark" ? "#333" : "#E5E5EA"}`,
-        opacity: 0.9,
-        transition: "opacity 0.3s ease",
-        fontWeight: "500",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-      }}
-        onMouseEnter={(e) => e.target.style.opacity = "1"}
-        onMouseLeave={(e) => e.target.style.opacity = "0.9"}
-      >
-        <FontAwesomeIcon icon={faChevronLeft} style={{ marginRight: "6px", fontSize: "14px" }} />
-        轻触返回
-      </div>
+
 
       {/* Header */}
       <header style={{
@@ -332,9 +306,7 @@ function CryptoDetail() {
           backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
           borderRadius: "12px",
           padding: "20px",
-          marginBottom: "16px",
-          boxShadow: theme === "dark" ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.1)",
-          border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
+          marginBottom: "16px"
         }}>
           {/* 币种图标和基本信息 */}
           <div style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
@@ -444,16 +416,15 @@ function CryptoDetail() {
           backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
           borderRadius: "12px",
           padding: "20px",
-          marginBottom: "16px",
-          boxShadow: theme === "dark" ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.1)",
-          border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
+          marginBottom: "16px"
         }}>
           <h3 style={{
             margin: "0 0 16px 0",
             fontSize: "18px",
             fontWeight: "bold"
           }}>
-            📊 市场数据
+            <FontAwesomeIcon icon={faChartBar} style={{ marginRight: "8px" }} />
+            市场数据
           </h3>
 
           <div style={{
@@ -501,9 +472,7 @@ function CryptoDetail() {
           backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
           borderRadius: "12px",
           padding: "20px",
-          marginBottom: "16px",
-          boxShadow: theme === "dark" ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.1)",
-          border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
+          marginBottom: "16px"
         }}>
           <h3 style={{
             margin: "0 0 16px 0",
@@ -559,9 +528,7 @@ function CryptoDetail() {
             backgroundColor: theme === "dark" ? "#2d2d2d" : "#fff",
             borderRadius: "12px",
             padding: "20px",
-            marginBottom: "16px",
-            boxShadow: theme === "dark" ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.1)",
-            border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
+            marginBottom: "16px"
           }}>
             <h3 style={{
               margin: "0 0 16px 0",

@@ -86,3 +86,13 @@ img {
     background: rgba(255, 255, 255, 0.3);
   }
 }
+
+/* 旋转动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faSpinner, faChartBar } from "@fortawesome/free-solid-svg-icons";
 
 function HomePage() {
   const [user, setUser] = useState(null);
@@ -204,25 +204,20 @@ function HomePage() {
                   width: "36px",
                   height: "36px",
                   touchAction: "manipulation",
-                  boxShadow: theme === "dark" ? "0 1px 3px rgba(0,0,0,0.3)" : "0 1px 3px rgba(0,0,0,0.1)",
-                  transition: "all 0.2s ease",
-                  border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`
+
+                  transition: "all 0.2s ease"
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {
                     e.target.style.backgroundColor = theme === "dark" ? "#4d4d4d" : "#e9ecef";
                     e.target.style.transform = "scale(1.1)";
-                    e.target.style.boxShadow = theme === "dark"
-                      ? "0 2px 6px rgba(0,0,0,0.4)"
-                      : "0 2px 6px rgba(0,0,0,0.15)";
+
                   }
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.backgroundColor = theme === "dark" ? "#3d3d3d" : "#f8f9fa";
                   e.target.style.transform = "scale(1)";
-                  e.target.style.boxShadow = theme === "dark"
-                    ? "0 1px 3px rgba(0,0,0,0.3)"
-                    : "0 1px 3px rgba(0,0,0,0.1)";
+
                 }}
               >
                 <FontAwesomeIcon
@@ -285,12 +280,12 @@ function HomePage() {
         <div style={{ marginBottom: "20px" }}>
           {loading ? (
             <div style={{ textAlign: "center", padding: "40px" }}>
-              <div style={{ fontSize: "18px", marginBottom: "10px" }}>⏳</div>
+              <FontAwesomeIcon icon={faSpinner} size="lg" style={{ marginBottom: "10px", animation: "spin 1s linear infinite" }} />
               <div>正在加载加密货币数据...</div>
             </div>
           ) : cryptoData.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px" }}>
-              <div style={{ fontSize: "18px", marginBottom: "10px" }}>📊</div>
+              <FontAwesomeIcon icon={faChartBar} size="lg" style={{ marginBottom: "10px", color: theme === "dark" ? "#666" : "#999" }} />
               <div>暂无虚拟货币数据</div>
             </div>
           ) : (
@@ -304,23 +299,19 @@ function HomePage() {
                     borderRadius: "12px",
                     padding: "16px",
                     marginBottom: "12px",
-                    boxShadow: theme === "dark" ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.1)",
-                    border: `1px solid ${theme === "dark" ? "#444" : "#e0e0e0"}`,
+
+
                     cursor: "pointer",
                     transition: "transform 0.2s ease, box-shadow 0.2s ease",
                     touchAction: "manipulation"
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.transform = "translateY(-2px)";
-                    e.target.style.boxShadow = theme === "dark"
-                      ? "0 6px 16px rgba(0,0,0,0.4)"
-                      : "0 6px 16px rgba(0,0,0,0.15)";
+
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.transform = "translateY(0)";
-                    e.target.style.boxShadow = theme === "dark"
-                      ? "0 2px 8px rgba(0,0,0,0.3)"
-                      : "0 2px 8px rgba(0,0,0,0.1)";
+
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
