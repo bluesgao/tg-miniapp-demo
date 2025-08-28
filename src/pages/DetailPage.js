@@ -172,7 +172,7 @@ function DetailPage() {
                             padding: '0'
                         }}
                     >
-                        首页
+                        返回
                     </Button>
 
                     {/* 刷新按钮 */}
