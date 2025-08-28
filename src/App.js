@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./HomePage";
-import CryptoDetail from "./CryptoDetail";
+import HomePage from "./pages/HomePage";
+import CryptoDetail from "./pages/CryptoDetail";
 
 function App() {
   return (
