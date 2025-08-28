@@ -79,6 +79,12 @@ function DetailPage() {
 
     // 返回首页
     const handleBack = () => {
+        // 清空数据
+        setCrypto(null);
+        setError(null);
+        setLoading(false);
+        setRefreshing(false);
+        // 导航到首页
         navigate("/");
     };
 
