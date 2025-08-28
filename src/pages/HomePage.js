@@ -298,11 +298,13 @@ function HomePage() {
             </>
           )}
 
-          {/* 底部信息 */}
-          <FooterInfo
-            onRefresh={handleManualRefresh}
-            onClose={() => window.Telegram?.WebApp?.close()}
-          />
+          {/* 底部信息 - 只在没有错误且数据正常时显示 */}
+          {!error && !loading && cryptoData.length > 0 && (
+            <FooterInfo
+              onRefresh={handleManualRefresh}
+              onClose={() => window.Telegram?.WebApp?.close()}
+            />
+          )}
         </PullToRefresh>
       </div>
 
