@@ -17,7 +17,7 @@ const SearchAndFilter = ({ onSearch, onFilterChange, activeFilter }) => {
                 marginBottom: '12px'
             }}>
                 <SearchBar
-                    placeholder="搜索加密货币名称或符号..."
+                    placeholder="搜索加密货币名称或符号"
                     onSearch={onSearch}
                     style={{
                         '--border-radius': '8px',
@@ -36,25 +36,32 @@ const SearchAndFilter = ({ onSearch, onFilterChange, activeFilter }) => {
                 overflowX: 'auto',
                 paddingBottom: '2px'
             }}>
-                {filters.map(filter => (
-                    <Button
-                        key={filter.key}
-                        size="small"
-                        fill={activeFilter === filter.key ? "solid" : "outline"}
-                        onClick={() => onFilterChange(filter.key)}
-                        style={{
-                            whiteSpace: 'nowrap',
-                            borderRadius: '6px',
-                            fontWeight: '500',
-                            minWidth: '70px',
-                            justifyContent: 'center',
-                            fontSize: '12px',
-                            padding: '6px 8px'
-                        }}
-                    >
-                        {filter.label}
-                    </Button>
-                ))}
+                {filters.map(filter => {
+                    const isActive = activeFilter === filter.key;
+                    return (
+                        <Button
+                            key={filter.key}
+                            size="small"
+                            fill={isActive ? "solid" : "outline"}
+                            onClick={() => onFilterChange(filter.key)}
+                            style={{
+                                whiteSpace: 'nowrap',
+                                borderRadius: '4px',
+                                fontWeight: '500',
+                                width: '60px',
+                                height: '32px',
+                                justifyContent: 'center',
+                                fontSize: '12px',
+                                padding: '6px 8px',
+                                border: isActive ? '1px solid #007AFF' : '1px solid #e5e5e5',
+                                backgroundColor: isActive ? '#007AFF' : '#fff',
+                                color: isActive ? '#fff' : '#333'
+                            }}
+                        >
+                            {filter.label}
+                        </Button>
+                    );
+                })}
             </div>
         </div>
     );
