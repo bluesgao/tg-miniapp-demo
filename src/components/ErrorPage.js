@@ -6,7 +6,7 @@ const ErrorPage = ({ error, onRetry, onRefresh }) => {
     return (
         <div style={{
             padding: '20px 16px',
-            minHeight: '60vh',
+            minHeight: '40vh',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',

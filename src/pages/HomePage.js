@@ -322,9 +322,15 @@ function HomePage() {
         <Button
           block shape='rounded' color='primary'
           onClick={handleManualRefresh}
-          loading={loading}
+          loading={refreshing}
+          style={{
+            height: '32px',
+            width: '60px',
+            fontSize: '12px',
+            padding: '0'
+          }}
         >
-          刷新
+          {refreshing ? '刷新中' : '刷新'}
         </Button>
       </div>
     </div>

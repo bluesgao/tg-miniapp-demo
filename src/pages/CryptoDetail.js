@@ -14,6 +14,7 @@ import PriceStats from '../components/PriceStats';
 import MarketData from '../components/MarketData';
 import PriceRange from '../components/PriceRange';
 import ProjectDescription from '../components/ProjectDescription';
+import ErrorPage from '../components/ErrorPage';
 
 
 
@@ -61,11 +62,7 @@ function CryptoDetail() {
       }
     } catch (err) {
       console.error('Error fetching crypto detail:', err);
-      setError('获取详细信息时出错，请稍后重试');
-      Toast.show({
-        content: '网络连接失败，请检查网络设置',
-        position: 'center'
-      });
+      setError('网络连接异常，无法获取数据。请检查网络设置或稍后重试。');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -106,45 +103,7 @@ function CryptoDetail() {
     );
   }
 
-  // 错误状态
-  if (error || !crypto) {
-    return (
-      <div style={{
-        backgroundColor: "#f5f5f5",
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        padding: "20px"
-      }}>
 
-        <div style={{
-          marginBottom: "20px",
-          textAlign: "center",
-          fontSize: "16px"
-        }}>
-          {error || "未找到该虚拟货币信息"}
-        </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <Button
-            color="primary"
-            size="large"
-            onClick={handleBack}
-          >
-            返回列表
-          </Button>
-          <Button
-            color="default"
-            size="large"
-            onClick={handleRefresh}
-          >
-            重试
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div style={{
@@ -160,10 +119,10 @@ function CryptoDetail() {
       >
         <div>
           <div style={{ fontSize: "18px", fontWeight: "600" }}>
-            {crypto.name}
+            {crypto?.name || "加密货币详情"}
           </div>
           <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
-            {crypto.symbol.toUpperCase()}
+            {crypto?.symbol?.toUpperCase() || ""}
           </div>
         </div>
       </NavBar>
@@ -172,29 +131,37 @@ function CryptoDetail() {
       <div style={{
         minHeight: "100vh"
       }}>
-        {/* 融合的币种信息和价格卡片 */}
-        <CryptoInfoCard crypto={crypto} />
+        {/* 错误状态 */}
+        {error || !crypto ? (
+          <ErrorPage
+            error={error || "未找到该虚拟货币信息"}
+            onRetry={handleRefresh}
+          />
+        ) : (
+          <>
+            {/* 融合的币种信息和价格卡片 */}
+            <CryptoInfoCard crypto={crypto} />
 
-        {/* 价格变化统计 */}
-        <PriceStats crypto={crypto} />
+            {/* 价格变化统计 */}
+            <PriceStats crypto={crypto} />
 
-        <Divider style={{ margin: "0" }} />
+            <Divider style={{ margin: "0" }} />
 
-        {/* 市场数据 */}
-        <MarketData crypto={crypto} />
+            {/* 市场数据 */}
+            <MarketData crypto={crypto} />
 
-        <Divider style={{ margin: "0" }} />
+            <Divider style={{ margin: "0" }} />
 
-        {/* 价格范围 */}
-        <PriceRange crypto={crypto} />
+            {/* 价格范围 */}
+            <PriceRange crypto={crypto} />
 
+            {/* 项目描述 */}
+            <ProjectDescription crypto={crypto} />
 
-
-        {/* 项目描述 */}
-        <ProjectDescription crypto={crypto} />
-
-        {/* 底部间距 */}
-        <div style={{ height: "20px" }} />
+            {/* 底部间距 */}
+            <div style={{ height: "20px" }} />
+          </>
+        )}
       </div>
 
       {/* 悬浮按钮 */}
@@ -210,6 +177,12 @@ function CryptoDetail() {
         {/* 返回首页按钮 */}
         <Button block shape='rounded' color='primary'
           onClick={handleBack}
+          style={{
+            height: '32px',
+            width: '60px',
+            fontSize: '12px',
+            padding: '0'
+          }}
         >
           首页
         </Button>
@@ -219,8 +192,14 @@ function CryptoDetail() {
           block shape='rounded' color='primary'
           onClick={handleRefresh}
           loading={refreshing}
+          style={{
+            height: '32px',
+            width: '60px',
+            fontSize: '12px',
+            padding: '0'
+          }}
         >
-          刷新
+          {refreshing ? '刷新中' : '刷新'}
         </Button>
       </div>
     </div>
