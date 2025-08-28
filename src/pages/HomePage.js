@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   NavBar,
   Button,
-  SpinLoading,
-  ErrorBlock,
   Toast,
   PullToRefresh
 } from "antd-mobile";
@@ -15,6 +13,7 @@ import MarketOverview from '../components/MarketOverview';
 import SearchAndFilter from '../components/SearchAndFilter';
 import ErrorPage from '../components/ErrorPage';
 import FooterInfo from '../components/FooterInfo';
+import DataLoading from '../components/DataLoading';
 
 
 
@@ -46,6 +45,9 @@ function HomePage() {
 
   // 获取加密货币数据
   const fetchCryptoData = useCallback(async (showLoading = true) => {
+    const startTime = Date.now();
+    const minLoadingTime = 800; // 最小加载时间 800ms
+
     try {
       if (showLoading) setLoading(true);
       setError(null);
@@ -107,20 +109,30 @@ function HomePage() {
         if (!showLoading) {
           Toast.show({
             content: '数据已更新',
-            position: 'center'
+            position: 'bottom'
           });
         }
       } else {
         setError('网络连接异常，无法获取加密货币数据。请检查网络设置或稍后重试。');
+        setCryptoData([]);
+        setFilteredData([]);
         console.error('All APIs failed');
       }
 
     } catch (err) {
       setError('服务器响应异常，请稍后重试。如果问题持续存在，请联系技术支持。');
+      setCryptoData([]);
+      setFilteredData([]);
       console.error('Error fetching crypto data:', err);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      // 确保加载状态至少显示最小时间
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+
+      setTimeout(() => {
+        setLoading(false);
+        setRefreshing(false);
+      }, remainingTime);
     }
   }, []);
 
@@ -187,6 +199,8 @@ function HomePage() {
 
   // 处理手动刷新
   const handleManualRefresh = () => {
+    setError(null);
+    setRefreshing(true);
     fetchCryptoData(false);
   };
 
@@ -195,6 +209,8 @@ function HomePage() {
     setError(null);
     fetchCryptoData(true);
   };
+
+
 
   return (
     <div style={{
@@ -225,114 +241,106 @@ function HomePage() {
         minHeight: "100vh"
       }}>
         <PullToRefresh onRefresh={handleRefresh}>
-          {/* 错误页面 */}
-          {error && !loading && (
-            <ErrorPage
-              error={error}
-              onRetry={handleRetry}
-              onRefresh={handleManualRefresh}
+          {/* 加载状态 */}
+          {loading ? (
+            <DataLoading
+              title="正在加载数据"
+              description="请稍候，正在获取最新的加密货币行情..."
             />
-          )}
-
-          {/* 正常内容 */}
-          {!error && (
+          ) : (
             <>
-              {/* 市场概览 */}
-              {!loading && cryptoData.length > 0 && (
-                <MarketOverview cryptoData={cryptoData} />
-              )}
+              {/* 错误状态 */}
+              {error || cryptoData.length === 0 ? (
+                <ErrorPage
+                  error={
+                    error ||
+                    (searchQuery
+                      ? `未找到包含"${searchQuery}"的加密货币`
+                      : "暂无虚拟货币数据")
+                  }
+                  onRetry={error ? handleRetry : handleManualRefresh}
+                />
+              ) : (
+                <>
+                  {/* 市场概览 */}
+                  <MarketOverview cryptoData={cryptoData} />
 
-              {/* 搜索和过滤 */}
-              {!loading && cryptoData.length > 0 && (
-                <div style={{
-                  backgroundColor: '#fff',
-                  margin: '0 16px 12px',
-                  borderRadius: '8px',
-                  padding: '12px'
-                }}>
+                  {/* 搜索和过滤 */}
                   <div style={{
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    marginBottom: '8px',
-                    color: '#333'
+                    backgroundColor: '#fff',
+                    margin: '0 16px 12px',
+                    borderRadius: '8px',
+                    padding: '12px'
                   }}>
-                    搜索和筛选
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      marginBottom: '8px',
+                      color: '#333'
+                    }}>
+                      搜索和筛选
+                    </div>
+                    <SearchAndFilter
+                      onSearch={handleSearch}
+                      onFilterChange={handleFilterChange}
+                      activeFilter={activeFilter}
+                    />
                   </div>
-                  <SearchAndFilter
-                    onSearch={handleSearch}
-                    onFilterChange={handleFilterChange}
-                    activeFilter={activeFilter}
-                  />
-                </div>
+
+                  {/* 加密货币列表 */}
+                  <div>
+                    <div>
+                      {filteredData.map((crypto) => (
+                        <CryptoCard
+                          key={crypto.id}
+                          crypto={crypto}
+                          onClick={() => handleCryptoClick(crypto.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
 
-              {/* 加密货币列表 */}
-              <div>
-                {loading ? (
-                  <div style={{ textAlign: "center", padding: "40px" }}>
-                    <SpinLoading style={{ marginBottom: "16px" }} />
-                    <div>正在加载加密货币数据...</div>
-                  </div>
-                ) : filteredData.length === 0 ? (
-                  <ErrorBlock
-                    title={
-                      searchQuery
-                        ? `未找到包含"${searchQuery}"的加密货币`
-                        : "暂无虚拟货币数据"
-                    }
-                    description="请尝试调整搜索条件或刷新数据"
-                    style={{ padding: "40px 0" }}
-                  />
-                ) : (
-                  <div>
-                    {filteredData.map((crypto) => (
-                      <CryptoCard
-                        key={crypto.id}
-                        crypto={crypto}
-                        onClick={() => handleCryptoClick(crypto.id)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* 底部信息 - 只在没有错误且数据正常时显示 */}
+              {!error && cryptoData.length > 0 && (
+                <FooterInfo
+                  onRefresh={handleManualRefresh}
+                  onClose={() => window.Telegram?.WebApp?.close()}
+                />
+              )}
             </>
-          )}
-
-          {/* 底部信息 - 只在没有错误且数据正常时显示 */}
-          {!error && !loading && cryptoData.length > 0 && (
-            <FooterInfo
-              onRefresh={handleManualRefresh}
-              onClose={() => window.Telegram?.WebApp?.close()}
-            />
           )}
         </PullToRefresh>
       </div>
 
-      {/* 悬浮按钮 */}
-      <div style={{
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        zIndex: 1000
-      }}>
-        {/* 刷新按钮 */}
-        <Button
-          block shape='rounded' color='primary'
-          onClick={handleManualRefresh}
-          loading={refreshing}
-          style={{
-            height: '32px',
-            width: '60px',
-            fontSize: '12px',
-            padding: '0'
-          }}
-        >
-          {refreshing ? '刷新中' : '刷新'}
-        </Button>
-      </div>
+      {/* 悬浮按钮 - 只在没有错误且不在刷新时显示 */}
+      {cryptoData.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          zIndex: 1000
+        }}>
+          {/* 刷新按钮 */}
+          <Button
+            block shape='rounded' color='primary'
+            onClick={handleManualRefresh}
+            loading={refreshing}
+            style={{
+              height: '32px',
+              width: '60px',
+              fontSize: '12px',
+              padding: '0'
+            }}
+          >
+            {refreshing ? '刷新中' : '刷新'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,11 +2,11 @@ import React from 'react';
 import { ErrorBlock, Button } from 'antd-mobile';
 
 // 错误页面组件
-const ErrorPage = ({ error, onRetry, onRefresh }) => {
+const ErrorPage = ({ error, onRetry }) => {
     return (
         <div style={{
             padding: '20px 16px',
-            minHeight: '40vh',
+            minHeight: '30vh',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -19,7 +19,7 @@ const ErrorPage = ({ error, onRetry, onRefresh }) => {
                 {/* 错误块 */}
                 <ErrorBlock
                     title="数据加载失败"
-                    description={error || '无法获取加密货币数据，请检查网络连接后重试'}
+                    description=""
                     style={{
                         marginBottom: '20px'
                     }}
@@ -32,7 +32,8 @@ const ErrorPage = ({ error, onRetry, onRefresh }) => {
                 }}>
                     <Button
                         color="primary"
-                        size="middle"
+                        size="small"
+                        shape='rounded'
                         onClick={onRetry}
                         style={{
                             minWidth: '120px'

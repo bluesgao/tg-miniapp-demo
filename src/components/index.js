@@ -10,4 +10,5 @@ export { default as ProjectDescription } from './ProjectDescription';
 export { default as PriceChangeIndicator } from './PriceChangeIndicator';
 export { default as ErrorPage } from './ErrorPage';
 export { default as FooterInfo } from './FooterInfo';
+export { default as DataLoading } from './DataLoading';
 export { formatUtils } from './formatUtils';
